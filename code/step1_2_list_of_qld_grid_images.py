@@ -112,13 +112,14 @@ def output_csv_fn(list_image, export_dir_path, variable):
     """
     # assumes that file_list is a flat list, it adds a new path in a new row, producing multiple observations.
     # todo remove the word new
-    export_rainfall = (export_dir_path + '\\{0}_image_list.csv'.format(variable))
-    with open(export_rainfall, "w") as output:
+    export_var = (export_dir_path + '\\{0}_image_list.csv'.format(variable))
+    with open(export_var, "w") as output:
         writer = csv.writer(output, lineterminator='\n')
         for file in list_image:
+            print([file])
             writer.writerow([file])
 
-    return export_rainfall
+    return export_var
 
 
 def main_routine(export_dir_path, variable_dir, end_file_name, variable, sub_dir_list, qld_grid_dir):
@@ -135,7 +136,7 @@ def main_routine(export_dir_path, variable_dir, end_file_name, variable, sub_dir
     for n in year_dir_list:
         print(n)
         ver_year_dir = os.path.join(qld_grid_dir, variable, n)
-        #print(ver_year_dir)
+        print(ver_year_dir)
 
         # call the list_dir_fn function to return a list of the rainfall raster images.
         list_image = list_dir_fn(ver_year_dir, end_file_name)
@@ -150,8 +151,10 @@ def main_routine(export_dir_path, variable_dir, end_file_name, variable, sub_dir
 
     # call the output_csv_fn function to return a csv containing each file paths stored in the list_image variable
     # (1 path per line).
-    export_csv = output_csv_fn(list_image, export_dir_path, variable)
+    export_csv = output_csv_fn(total_list, export_dir_path, variable)
+    #export_csv = output_csv_fn(list_image, export_dir_path, variable)
     print("export csv: ", export_csv)
+
 
     return export_csv #, rain_start_date, rain_finish_date
 

@@ -76,7 +76,7 @@ def met_correction_fn(output_zonal_stats, var_, variable_values):
     output_zonal_stats['{0}_mean'.format(var_)] = (output_zonal_stats['{0}_mean'.format(var_)] * variable_values[2]) +  variable_values[4]
     output_zonal_stats['{0}_med'.format(var_)] = (output_zonal_stats['{0}_med'.format(var_)] * variable_values[2]) +  variable_values[4]
     output_zonal_stats['{0}_p25'.format(var_)] = (output_zonal_stats['{0}_p25'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_p40'.format(var_)] = (output_zonal_stats['{0}_p50'.format(var_)] * variable_values[2]) +  variable_values[4]
+    output_zonal_stats['{0}_p50'.format(var_)] = (output_zonal_stats['{0}_p50'.format(var_)] * variable_values[2]) +  variable_values[4]
     output_zonal_stats['{0}_p75'.format(var_)] = (output_zonal_stats['{0}_p75'.format(var_)] * variable_values[2]) +  variable_values[4]
     output_zonal_stats['{0}_p95'.format(var_)] = (output_zonal_stats['{0}_p95'.format(var_)] * variable_values[2]) +  variable_values[4]
     output_zonal_stats['{0}_p99'.format(var_)] = (output_zonal_stats['{0}_p99'.format(var_)] * variable_values[2]) +  variable_values[4]
@@ -166,7 +166,7 @@ def apply_zonal_stats_fn(image_s, projected_shape_path, uid, qld_dict, variable)
             list_b = file_name.rsplit("'")
             file_name_final = list_b[0]
             img_date = file_name_final[1:9]
-
+            print("ZS: ", zs)
             for zone in zs:
                 zone_stats = zone
                 count = zone_stats["count"]
@@ -188,6 +188,8 @@ def apply_zonal_stats_fn(image_s, projected_shape_path, uid, qld_dict, variable)
                 # put the individual results in a list and append them to the zone_stats list
                 result = [mean, std, med, minimum, maximum, count, percentile_25, percentile_50,
                           percentile_75, percentile_95, percentile_99, range_]
+
+                print("Result: ", result)
                 zone_stats_list.append(result)
 
             # extract out the site number for the polygon
@@ -230,6 +232,8 @@ def clean_data_frame_fn(output_list, max_temp_output_dir, variable, var_, qld_di
                var_ + '_max', var_ + '_count', var_ + "_p25", var_ + "_p50", var_ + "_p75", var_ + "_p95",
                var_ + "_p99", var_ + "_range", 'im_name']
 
+    df1 = pd.DataFrame.from_records(output_list)
+    print(df1)
     output_df = pd.DataFrame.from_records(output_list, columns=headers)
     # print('output_max_temp: ', output_max_temp)
     variable_values = qld_dict.get(variable)
