@@ -130,14 +130,14 @@ def get_cmd_args_fn():
 
     p.add_argument('-x', '--export_dir',
                    help='Enter the export directory for all of the final outputs.',
-                   default=r'Z:\Scratch\Zonal_Stats_Pipeline\non_rmb_fractional_cover_zonal_stats\outputs')
+                   default=r'U:\scratch\rob\pipelines\outputs')
 
     p.add_argument('-i', '--image_count', type=int,
                    help='Enter the minimum amount of Landsat images required per tile as an integer (i.e. 950).',
                    default=100)
 
     p.add_argument('-l', '--qld_dir', help="The qld meteorological data directory path",
-                   default=r"Z:\Scratch\Rob\qld")
+                   default=r"U:\scratch\rob\qld_grid_data")
 
     p.add_argument('-n', '--no_data', help="Enter the Landsat Fractional Cover no data value (i.e. 0)",
                    default=0)
@@ -449,9 +449,17 @@ def main_routine():
 
     prop_of_interest = "None"
 
+    print(sub_dir_list)
+    # select_sub_list = [sub_dir_list[9], sub_dir_list[10],
+    #                    sub_dir_list[14], sub_dir_list[15]] #[sub_dir_list[0], sub_dir_list[1],
+    #
+    select_sub_list = sub_dir_list
+    print(select_sub_list)
+
     sub_dir_list_csv = []
     #
-    for i in sub_dir_list:
+    for i in select_sub_list:
+        print(i)
         type_dir = os.path.join(qld_grid_dir, i)
 
         import step1_2_list_of_qld_grid_images
@@ -481,7 +489,10 @@ def main_routine():
 
 
     print("step1 8 QLD grid")
-    for i, csv_file in zip(sub_dir_list, sub_dir_list_csv):
+    for i, csv_file in zip(select_sub_list, sub_dir_list_csv):
+        print("*"*50)
+        print("i: ", i)
+        print("csv file: ", csv_file)
         import step1_8_qld_grid_zonal_stats
         step1_8_qld_grid_zonal_stats.main_routine(
             export_dir_path, i, csv_file, temp_dir_path, qld_dict, geo_df2, qld_dict)

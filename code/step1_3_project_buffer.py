@@ -114,7 +114,6 @@ def single_csv_fn(list_input): #, list_name):
     @return df: Pandas dataframe containing the concatenated csv files from the input list
     """
     for i in list_input: #, list_name):
-        #print('148: ', i)
         df = pd.read_csv(i)
         # df.insert(0, "site", name, allow_duplicates=False)
 
@@ -218,9 +217,12 @@ def add_site_attribute_fn(prime_temp_buffer_dir, buffer_temp_dir, crs_name):
             if file.endswith(ends_with):
                 # print("file ends with ", ends_with)
                 # split file name
+                #todo split site name od underscore
                 list_file_variables = file.split('_')
                 # print(list_file_variables)
-                site = list_file_variables[0]
+                site_ = list_file_variables[0]
+                date_ = list_file_variables[1]
+                site = f"{site_}_{str(date_)}"
 
                 shp = os.path.join(root, file)
                 geo_df = gpd.read_file(shp, driver="ESRI Shapefile")
@@ -298,6 +300,14 @@ def main_routine(data, export_dir_path, prime_temp_buffer_dir):
 
     df = pd.read_csv(data)
 
+    # remove underscore from site name
+    site_list = []
+    for i in df.site:
+        n = i.replace("_", "")
+        m = n[:-4] + "." + n[-4:]
+        site_list.append(m)
+    df["site"] = site_list
+
     gdf = gpd.GeoDataFrame(
         df, geometry=gpd.points_from_xy(df.lon_gda94, df.lat_gda94))
 
@@ -305,7 +315,7 @@ def main_routine(data, export_dir_path, prime_temp_buffer_dir):
     gdf1 = gdf.set_crs(epsg=4283)
     #print(gdf1.crs)
 
-    geo_df2 = gdf1.drop_duplicates(subset=["site"], keep="first")
+    geo_df2 = gdf1.drop_duplicates(keep="first") #subset=["site"], keep="first")
     #print(geo_df2.shape)
 
     geo_df2.reset_index(drop=True, inplace=True)
@@ -318,54 +328,6 @@ def main_routine(data, export_dir_path, prime_temp_buffer_dir):
     # print("shapefile exported: ", file_export)
 
     geo_df2.to_file(file_export, driver='ESRI Shapefile')
-
-    #print("shapefile exported: ", file_export)
-    #print(prime_temp_buffer_dir)
-    #print("zone: ", zone)
-    #print(type(zone))
-    # if zone == "2":
-    #     print("zone: ", zone)
-    #
-    #     # set epsg to WGSz52.
-    #     epsg = 32752
-    #
-    #     # Project allometry_biomass_gdf to WGSz52.
-    #     crs_name, crs_output, projected_df = projection_file_name_fn(epsg, geo_df2)
-    #     #print(projected_df)
-    #     # Apply a 1ha square buffer to each point.
-    #     buffer_temp_dir = square_buffer_fn(projected_df, prime_temp_buffer_dir, crs_name)
-    #     #print(buffer_temp_dir)
-    #     # Add attributes (SITE_NAME and PROP_CODE) to geo-DataFrame.
-    #     prime_temp_buffer_dir = add_site_attribute_fn(prime_temp_buffer_dir, buffer_temp_dir, crs_name)
-    #     #print(prime_temp_buffer_dir)
-    #     # Concatenate, clean and export geo_df_52
-    #     crs_name = 'WGS84z52'
-    #     geo_df, crs_name_52 = concatenate_df_fn(prime_temp_buffer_dir, export_dir_path, crs_name)
-    #
-    #     geo_df.to_file(os.path.join(export_dir_path, "hectare_sites_{0}.shp".format(crs_name)), driver="ESRI Shapefile")
-    #
-    # elif zone == "3":
-    #     #print("zone: ", zone)
-    #
-    #     # set epsg to WGSz52
-    #     epsg = 32753
-    #
-    #     # Project allometry_biomass_gdf to WGSz52.
-    #     crs_name, crs_output, projected_df = projection_file_name_fn(epsg, geo_df2)
-    #
-    #     # Apply a 1ha square buffer to each point.
-    #     buffer_temp_dir = square_buffer_fn(projected_df, prime_temp_buffer_dir, crs_name)
-    #
-    #     # Add attributes (SITE_NAME and PROP_CODE) to geo-DataFrame.
-    #     prime_temp_buffer_dir = add_site_attribute_fn(prime_temp_buffer_dir, buffer_temp_dir, crs_name)
-    #
-    #     # Concatenate, clean and export geo_df_53
-    #     crs_name = 'WGS84z53'
-    #     geo_df, crs_name_53 = concatenate_df_fn(prime_temp_buffer_dir, export_dir_path, crs_name)
-    #
-    #     geo_df.to_file(os.path.join(export_dir_path, "hectare_sites_{0}.shp".format(crs_name)), driver="ESRI Shapefile")
-    #
-    #
 
     # set epsg to Albers
     epsg = 3577

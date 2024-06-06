@@ -240,7 +240,12 @@ def clean_data_frame_fn(output_list, max_temp_output_dir, variable, var_, qld_di
     met_correction_fn(output_df, var_, variable_values)
 
     site = output_df['site'].unique()
+
+    print(list(output_df.columns))
     print('list of site names: ', site)
+
+    # import sys
+    # sys.exit()
 
     print("length of site list: ", len(site))
     if len(site) >= 1:
