@@ -159,6 +159,9 @@ def projection_file_name_fn(epsg, allometry_biomass_gdf):
     # Project DF to epsg value
     projected_df = allometry_biomass_gdf.to_crs(epsg)
     #print(projected_df)
+
+    print(crs_name, crs_output)
+
     return crs_name, crs_output, projected_df
 
 
@@ -215,9 +218,6 @@ def add_site_attribute_fn(prime_temp_buffer_dir, buffer_temp_dir, crs_name):
             # print("file", file)
             ends_with = '.shp'
             if file.endswith(ends_with):
-                # print("file ends with ", ends_with)
-                # split file name
-                #todo split site name od underscore
                 list_file_variables = file.split('_')
                 # print(list_file_variables)
                 site_ = list_file_variables[0]
@@ -345,7 +345,9 @@ def main_routine(data, export_dir_path, prime_temp_buffer_dir):
     crs_name = 'albers'
     geo_df, crs_name_albers = concatenate_df_fn(prime_temp_buffer_dir, export_dir_path, crs_name)
 
-    geo_df.to_file(os.path.join(export_dir_path, "hectare_sites_{0}.shp".format(crs_name)), driver="ESRI Shapefile")
+    path_ = os.path.join(export_dir_path, "hectare_sites_{0}.shp".format(crs_name))
+    print("vector path_: ", path_)
+    geo_df.to_file(path_, driver="ESRI Shapefile")
 
     return geo_df, crs_name
 

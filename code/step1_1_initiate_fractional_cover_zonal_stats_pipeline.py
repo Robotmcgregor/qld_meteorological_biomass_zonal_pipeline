@@ -130,17 +130,23 @@ def get_cmd_args_fn():
 
     p.add_argument('-x', '--export_dir',
                    help='Enter the export directory for all of the final outputs.',
-                   default=r'U:\scratch\rob\pipelines\outputs')
+                   default=r'C:\Users\robot\projects\outputs\qld_silo')
 
     p.add_argument('-i', '--image_count', type=int,
                    help='Enter the minimum amount of Landsat images required per tile as an integer (i.e. 950).',
                    default=100)
 
-    p.add_argument('-l', '--qld_dir', help="The qld meteorological data directory path",
-                   default=r"U:\scratch\rob\qld_grid_data")
+    p.add_argument('-ma', '--met_analysis', help="The path to the met analysis directory",
+                   default=r"C:\Users\robot\projects\development\met_analysis")
 
-    p.add_argument('-n', '--no_data', help="Enter the Landsat Fractional Cover no data value (i.e. 0)",
-                   default=0)
+    p.add_argument('-n', '--no_data', help="Enter the Landsat Fractional Cover no data value (i.e. -1)",
+                   default=-1)
+
+    p.add_argument('-s', '--season', help="Enter the season (i.e. annual, wet, dry)",
+                   default="ann")
+
+    p.add_argument('-m', '--met_ver', help="Enter the met veriable (i.e. daily_rain, rh_tmax)",
+                   default="daily_rain")
 
     cmd_args = p.parse_args()
 
@@ -162,7 +168,7 @@ def temporary_dir_fn():
     # extract user name
     home_dir = os.path.expanduser("~")
     _, user = home_dir.rsplit('\\', 1)
-    final_user = user[3:]
+    final_user = user#[3:]
 
     # create file name based on date and time.
     date_time_replace = str(datetime.now()).replace('-', '')
@@ -228,7 +234,7 @@ def export_file_path_fn(export_dir, final_user):
     date_time_replace = str(datetime.now()).replace('-', '')
     date_time_list = date_time_replace.split(' ')
     date_time_list_split = date_time_list[1].split(':')
-    export_dir_path = export_dir + '\\' + final_user + '_meteorological_' + str(date_time_list[0]) + '_' + str(
+    export_dir_path = export_dir + '\\' + final_user + '_met_ver_zonal_' + str(date_time_list[0]) + '_' + str(
         date_time_list_split[0]) + str(
         date_time_list_split[1])
 
@@ -246,7 +252,7 @@ def export_file_path_fn(export_dir, final_user):
     return export_dir_path
 
 
-def export_dir_folders_fn(export_dir_path, sub_dir_list):
+def export_dir_folders_fn(export_dir_path, met_ver, sub_dir_list):
     """ Create sub-folders within the export directory.
 
     @param export_dir_path: string object containing the newly created export directory path.
@@ -261,132 +267,46 @@ def export_dir_folders_fn(export_dir_path, sub_dir_list):
     # rainfall_output_dir = (export_dir_path + '\\rainfall')
     # os.mkdir(rainfall_output_dir)
 
+    met_dir = os.path.join(export_dir_path, met_ver)
+    os.mkdir(met_dir)
+    ex_dir_path_list = []
     for i in sub_dir_list:
-        i_output_dir = (os.path.join(export_dir_path, i))
+
+        i_output_dir = (os.path.join(met_dir, i))
         os.mkdir(i_output_dir)
+        print(f"Created: {i_output_dir}")
+        ex_dir_path_list.append(i_output_dir)
 
-    # fpc_tile_status_dir = (export_dir_path + '\\fpc_tile_status')
-    # os.mkdir(fpc_tile_status_dir)
-    #
-    # ref_tile_status_dir = (export_dir_path + '\\ref_tile_status')
-    # os.mkdir(ref_tile_status_dir)
-    #
-    # th_tile_status_dir = (export_dir_path + '\\th_tile_status')
-    # os.mkdir(th_tile_status_dir)
-    #
-    # pg_tile_status_dir = (export_dir_path + '\\pg_tile_status')
-    # os.mkdir(pg_tile_status_dir)
-    #
-    # dp0_tile_status_dir = (export_dir_path + '\\dp0_tile_status')
-    # os.mkdir(dp0_tile_status_dir)
+    return ex_dir_path_list
+
+def find_directories_with_file_type(root_dir, file_extension):
+    # List to store directories containing the specified file type
+    directories = set()
+
+    # Walk through the directory tree
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        # Check for files with the specified extension
+        for filename in filenames:
+            if filename.endswith(file_extension):
+                directories.add(dirpath)
+                break  # No need to check more files in this directory
+
+    return directories
 
 
-    # # ----------------------------------------------------------------------
-    #
-    # fpc_tile_for_processing_dir = (fpc_tile_status_dir + '\\fpc_for_processing')
-    # os.mkdir(fpc_tile_for_processing_dir)
-    #
-    # ref_tile_for_processing_dir = (ref_tile_status_dir + '\\ref_for_processing')
-    # os.mkdir(ref_tile_for_processing_dir)
-    #
-    # th_tile_for_processing_dir = (th_tile_status_dir + '\\th_for_processing')
-    # os.mkdir(th_tile_for_processing_dir)
-    #
-    # pg_tile_for_processing_dir = (pg_tile_status_dir + '\\pg_for_processing')
-    # os.mkdir(pg_tile_for_processing_dir)
-    #
-    # dp0_tile_for_processing_dir = (dp0_tile_status_dir + '\\dp0_for_processing')
-    # os.mkdir(dp0_tile_for_processing_dir)
-    #
-    # # -----------------------------------------------------------------------
-    #
-    # fpc_insuf_files_dir = (fpc_tile_status_dir + '\\fpc_insufficient_files')
-    # os.mkdir(fpc_insuf_files_dir)
-    #
-    # ref_insuf_files_dir = (ref_tile_status_dir + '\\ref_insufficient_files')
-    # os.mkdir(ref_insuf_files_dir)
-    #
-    # th_insuf_files_dir = (th_tile_status_dir + '\\th_insufficient_files')
-    # os.mkdir(th_insuf_files_dir)
-    #
-    # pg_insuf_files_dir = (pg_tile_status_dir + '\\pg_insufficient_files')
-    # os.mkdir(pg_insuf_files_dir)
-    #
-    # dp0_insuf_files_dir = (dp0_tile_status_dir + '\\dp0_insufficient_files')
-    # os.mkdir(dp0_insuf_files_dir)
-    #
-    # # ------------------------------------------------------------------------
-    #
-    # fpc_stat_list_dir = fpc_tile_status_dir + '\\fpc_tile_status_lists'
-    # os.mkdir(fpc_stat_list_dir)
-    #
-    # ref_stat_list_dir = ref_tile_status_dir + '\\ref_tile_status_lists'
-    # os.mkdir(ref_stat_list_dir)
-    #
-    # th_stat_list_dir = th_tile_status_dir + '\\th_tile_status_lists'
-    # os.mkdir(th_stat_list_dir)
-    #
-    # pg_stat_list_dir = pg_tile_status_dir + '\\pg_tile_status_lists'
-    # os.mkdir(pg_stat_list_dir)
-    #
-    # dp0_stat_list_dir = dp0_tile_status_dir + '\\dp0_tile_status_lists'
-    # os.mkdir(dp0_stat_list_dir)
-    #
-    # # -------------------------------------------------------------------------
-    #
-    # plot_dir = export_dir_path + '\\plots'
-    # os.mkdir(plot_dir)
-    #
-    # interactive_outputs = plot_dir + '\\interactive'
-    # os.mkdir(interactive_outputs)
-    #
-    # final_plot_outputs = export_dir_path + '\\final_plots'
-    # os.mkdir(final_plot_outputs)
-    #
-    # final_interactive_outputs = export_dir_path + '\\final_interactive'
-    # os.mkdir(final_interactive_outputs)
-    #
-    # fpc_zonal_stats_output_dir = (export_dir_path + '\\fpc_zonal_stats')
-    # os.mkdir(fpc_zonal_stats_output_dir)
-    #
-    # ref_zonal_stats_output_dir = (export_dir_path + '\\ref_zonal_stats')
-    # os.mkdir(ref_zonal_stats_output_dir)
-    #
-    # th_zonal_stats_output_dir = (export_dir_path + '\\th_zonal_stats')
-    # os.mkdir(th_zonal_stats_output_dir)
-    #
-    # pg_zonal_stats_output_dir = (export_dir_path + '\\pg_zonal_stats')
-    # os.mkdir(pg_zonal_stats_output_dir)
-    #
-    # h99a2_zonal_stats_output_dir = (export_dir_path + '\\h99a2_zonal_stats')
-    # os.mkdir(h99a2_zonal_stats_output_dir)
-    #
-    # fpca2_zonal_stats_output_dir = (export_dir_path + '\\fpca2_zonal_stats')
-    # os.mkdir(fpca2_zonal_stats_output_dir)
-    #
-    # dp0_zonal_stats_output_dir = (export_dir_path + '\\dp0_zonal_stats')
-    # os.mkdir(dp0_zonal_stats_output_dir)
-    #
-    # dbi_zonal_stats_output_dir = (export_dir_path + '\\dbi_zonal_stats')
-    # os.mkdir(dbi_zonal_stats_output_dir)
-    #
-    # dim_zonal_stats_output_dir = (export_dir_path + '\\dim_zonal_stats')
-    # os.mkdir(dim_zonal_stats_output_dir)
-    #
-    # dis_zonal_stats_output_dir = (export_dir_path + '\\dis_zonal_stats')
-    # os.mkdir(dis_zonal_stats_output_dir)
-    #
-    # dja_zonal_stats_output_dir = (export_dir_path + '\\dja_zonal_stats')
-    # os.mkdir(dja_zonal_stats_output_dir)
-    #
-    # dka_zonal_stats_output_dir = (export_dir_path + '\\dka_zonal_stats')
-    # os.mkdir(dka_zonal_stats_output_dir)
-    #
-    # stc_zonal_stats_output_dir = (export_dir_path + '\\stc_zonal_stats')
-    # os.mkdir(stc_zonal_stats_output_dir)
-    #
-    # return fpc_tile_status_dir, ref_tile_status_dir
+def split_path_at_4th_dir(path):
+    # Split the path into its components
+    parts = path.split(os.sep)
 
+    # Check if the path has at least 4 directories
+    if len(parts) < 5:  # 4 directories + 1 for the root directory
+        raise ValueError("Path does not have at least 4 directories.")
+
+    # Join the parts back into two paths
+    first_part = os.sep.join(parts[:4])
+    second_part = os.sep.join(parts[4:])
+
+    return first_part, second_part
 
 def main_routine():
     """" Description: This script determines which Landsat tile had the most non null zonal statistics records per site
@@ -398,41 +318,36 @@ def main_routine():
     data = cmd_args.data
     # tile_grid = cmd_args.tile_grid
     export_dir = cmd_args.export_dir
-    qld_grid_dir = cmd_args.qld_dir
+    met_analysis = cmd_args.met_analysis
+    season = cmd_args.season
+    met_ver = cmd_args.met_ver
     no_data = int(cmd_args.no_data)
-    # rainfall_dir = cmd_args.rainfall_dir
     image_count = int(cmd_args.image_count)
-    # image_search_criteria1 = cmd_args.search_criteria1
-    # image_search_criteria2 = cmd_args.search_criteria2
-    # end_file_name = cmd_args.search_criteria3
-    # rolling_mean = cmd_args.rolling_mean
-    # end_date = cmd_args.end_date
-    # path = cmd_args.path
-    # row = cmd_args.row
+
+    # dictionary {varable: [string_val, unit, variable, scale, null_data, add_offset, out_name]
+    qld_dict = {"rh_tmax": [-20, "%", "rh_tmax", 0.1, -32767.0, 3276.5, "rhmax"],
+             "rh_tmin": [-20, "%", "rh_tmin", 0.1, -32767.0, 3276.5, "rhmin"],
+             "daily_rain": [-23, "mm", "rain_d", 0.1, -32767.0, 3276.5, "dlyrn"],
+             "et_morton_actual": [-29, "mm", "et_ma", 0.1, -32767.0, 0.0, "morat"],
+             # "et_morton_potential": ["mm", "et_mp", 0.1, -32767.0, 0.0],
+             # "et_morton_wet": ["mm", "et_mw", 0.1, -32767.0, 0.0],
+             # "et_short_crop": ["mm", "et_sc", 0.1, -32767.0, 0.0],
+             # "et_tall_crop": ["mm", "et_tc", 0.1, -32767.0, 0.0],
+             # "evap_morton_lake": ["mm", "evp_ml", 0.1, -32767.0, 0.0],
+             # "evap_pan": ["mm", "evp_s", 0.1, -32767.0, 0.0],
+             # "evap_syn": ["mm", "evp_s", 0.1, -32767.0, 0.0],
+             "max_temp": [-21, "C", "tmax", 0.1, -32767.0, 0.0, "tpmax"],
+             "min_temp": [-21, "C", "tmin", 0.1, -32767.0, 0.0, "tpmin"],
+             "monthly_rain": ["mm", "rain_m", 0.1, -32767.0, 3276.5, "monrn"],
+             # "mslp": ["hPa", "mslp", 0.1, -32767.0, 0.0],
+             # "radiation": ["MJ/m2", "rad", 0.1, -32767.0, 0.0],
+             # "vp": ["hPa", "vp", 0.1, -32767.0, 0.0],
+             # "vp_deficit": ["hPa", "vp_d", 0.1, -32767.0, 0.0],
+             }
 
 
-    #qld_grid_dir = r"Z:\Scratch\Rob\test_grid_data"
-
-    # dictionary {varable: [unit, variable, scale, null_data, add_offset]
-    qld_dict = {"rh_tmax": ["%", "rh_tmax", 0.1, -32767.0, 3276.5],
-                "rh_tmin": ["%", "rh_tmin", 0.1, -32767.0, 3276.5],
-                "daily_rain": ["mm", "rain_d", 0.1, -32767.0, 3276.5],
-                "et_morton_actual": ["mm", "et_ma", 0.1, -32767.0, 0.0],
-                "et_morton_potential": ["mm", "et_mp", 0.1, -32767.0, 0.0],
-                "et_morton_wet": ["mm", "et_mw", 0.1, -32767.0, 0.0],
-                "et_short_crop": ["mm", "et_sc", 0.1, -32767.0, 0.0],
-                "et_tall_crop": ["mm", "et_tc", 0.1, -32767.0, 0.0],
-                "evap_morton_lake": ["mm", "evp_ml", 0.1, -32767.0, 0.0],
-                "evap_pan": ["mm", "evp_s", 0.1, -32767.0, 0.0],
-                "evap_syn": ["mm", "evp_s", 0.1, -32767.0, 0.0],
-                "max_temp": ["C", "tmax", 0.1, -32767.0, 0.0],
-                "min_temp": ["C", "tmin", 0.1, -32767.0, 0.0],
-                "monthly_rain": ["mm", "rain_m", 0.1, -32767.0, 3276.5],
-                "mslp": ["hPa", "mslp", 0.1, -32767.0, 0.0],
-                "radiation": ["MJ/m2", "rad", 0.1, -32767.0, 0.0],
-                "vp": ["hPa", "vp", 0.1, -32767.0, 0.0],
-                "vp_deficit": ["hPa", "vp_d", 0.1, -32767.0, 0.0]}
-
+    dict_values = qld_dict.get(met_ver)
+    print("variable: ", dict_values)
     # call the temporaryDir function.
     temp_dir_path, final_user = temporary_dir_fn()
     # call the tempDirFolders function.
@@ -440,42 +355,60 @@ def main_routine():
     # call the exportFilepath function.
     export_dir_path = export_file_path_fn(export_dir, final_user)
 
-    # # create a list of variable sub directories
-    sub_dir_list = next(os.walk(qld_grid_dir))[1]
-    #
-    # call the exportDirFolders function.
-    # fpc_tile_status_dir, ref_tile_status_dir = export_dir_folders_fn(export_dir_path, sub_dir_list)
-    export_dir_folders_fn(export_dir_path, sub_dir_list)
+    nt_path = os.path.join(met_analysis, "nt", dict_values[-1])
+    print("nt_path: ", nt_path)
+
+    # Begin finding directory paths
+    root_directory = nt_path
+    extension = '.tif'  # Change this to the file extension you're looking for
+    directories = find_directories_with_file_type(root_directory, extension)
+
+    # Create a list of all directories that contain tiff files
+    list_of_directories = []
+    list_of_dir_create = []
+    for directory in directories:
+        list_of_directories.append(directory)
+        print("-"*20)
+        print(directory)
+
+        first_part, second_part = split_path_at_4th_dir(directory)
+
+        print("First part:", first_part)
+        print("Second part:", second_part)
+        out_sub_dir = second_part.replace("\\", "_")
+        print("out_sub_dir: ", out_sub_dir)
+        list_of_dir_create.append(out_sub_dir)
+
+    #     print(i, n)
+    ex_dir_path_list = export_dir_folders_fn(export_dir_path, met_ver, list_of_dir_create)
+
+    # import sys
+    # sys.exit()
+
 
     prop_of_interest = "None"
 
-    print(sub_dir_list)
+    #print(sub_dir_list)
     # select_sub_list = [sub_dir_list[9], sub_dir_list[10],
     #                    sub_dir_list[14], sub_dir_list[15]] #[sub_dir_list[0], sub_dir_list[1],
     #
-    select_sub_list = sub_dir_list
-    print(select_sub_list)
+    # select_sub_list = sub_dir_list
+    # print(select_sub_list)
+
+
 
     sub_dir_list_csv = []
-    #
-    for i in select_sub_list:
-        print(i)
-        type_dir = os.path.join(qld_grid_dir, i)
+    for i, o in zip(list_of_directories, ex_dir_path_list):
+        print(i, o)
 
         import step1_2_list_of_qld_grid_images
-        export_csv = step1_2_list_of_qld_grid_images.main_routine(
-            export_dir_path, type_dir, ".tif", str(i), sub_dir_list, qld_grid_dir)
+        export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, "tif", temp_dir_path)
+            #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
 
         sub_dir_list_csv.append(export_csv)
 
-
-    print(data)
     import step1_3_project_buffer
     geo_df2, crs_name = step1_3_project_buffer.main_routine(data, export_dir_path, prime_temp_buffer_dir)
-
-    # import step1_4_landsat_tile_grid_identify2
-    # comp_geo_df, zonal_stats_ready_dir = step1_4_landsat_tile_grid_identify2.main_routine(
-    #     tile_grid, geo_df2, data, zone, export_dir_path, prime_temp_grid_dir)
 
     geo_df2.reset_index(drop=True, inplace=True)
     geo_df2['uid'] = geo_df2.index + 1
@@ -486,23 +419,31 @@ def main_routine():
                     driver="ESRI Shapefile")
 
     print("Exported shapefile: ", shapefile_path)
+    #
+    print("1_1 line 511")
 
-
-    print("step1 8 QLD grid")
-    for i, csv_file in zip(select_sub_list, sub_dir_list_csv):
-        print("*"*50)
-        print("i: ", i)
-        print("csv file: ", csv_file)
+    for in_dir, out_dir, csv_list, data_type in zip(list_of_directories, ex_dir_path_list, sub_dir_list_csv, list_of_dir_create):
+        #for i in sub_dir_list_csv:
+        print(in_dir, out_dir, csv_list)
         import step1_8_qld_grid_zonal_stats
         step1_8_qld_grid_zonal_stats.main_routine(
-            export_dir_path, i, csv_file, temp_dir_path, qld_dict, geo_df2, qld_dict)
+            in_dir, out_dir, csv_list, data_type, temp_dir_path, qld_dict, geo_df2, qld_dict, met_ver, shapefile_path)
+
+        print(f"completed: ", out_dir)
+        # import sys
+        # sys.exit()
+
+
+    # import sys
+    # sys.exit()
+    # print("step1 8 QLD grid")
 
     # ---------------------------------------------------- Clean up ----------------------------------------------------
 
     shutil.rmtree(temp_dir_path)
     print('Temporary directory and its contents has been deleted from your working drive.')
     print(' - ', temp_dir_path)
-    print('fractional cover zonal stats pipeline is complete.')
+    print('met zonal stats pipeline is complete.')
     print('goodbye.')
 
 

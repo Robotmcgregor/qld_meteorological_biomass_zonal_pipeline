@@ -70,38 +70,6 @@ def list_dir_fn(rainfall_dir, end_file_name):
     return list_image
 
 
-# def rainfall_start_finish_dates_fn(list_image):
-#     """ Sorts the list of paths numerically and extract the first and last dates for the available rainfall images.
-#
-#     @param list_image: list object containing the path to all rainfall images within the rainfall directory that meet
-#     the search criteria - created under the list_dir_fn function.
-#     @return rain_start_date: string object containing the date of the first rainfall image available.
-#     @return rain_finish_date: string object containing the date of the last rainfall image available.
-#     """
-#     #print('-' * 50)
-#     # sort the list image
-#     list_image.sort()
-#
-#     path_s = list_image[0]
-#
-#     image_ = path_s.rsplit('\\')
-#     image_name = image_[-1]
-#     year_s = image_name[:4]
-#     month_s = image_name[4:6]
-#     rain_start_date = (str(year_s) + '-' + str(month_s) + '-01')
-#     #print('rain_start_date: ', rain_start_date)
-#
-#     path_f = list_image[-1]
-#     image_ = path_f.rsplit('\\')
-#     image_name = image_[-1]
-#     year_f = image_name[:4]
-#     month_f = image_name[4:6]
-#     rain_finish_date = (str(year_f) + '-' + str(month_f) + '-30')
-#     #print('rain_finish_date: ', rain_finish_date)
-#
-#     return rain_start_date, rain_finish_date
-
-
 def output_csv_fn(list_image, export_dir_path, variable):
     """ Return a csv containing each file paths stored in the list_image variable (1 path per line).
 
@@ -111,52 +79,29 @@ def output_csv_fn(list_image, export_dir_path, variable):
     @return export_rainfall: string object containing the path to the populated csv.
     """
     # assumes that file_list is a flat list, it adds a new path in a new row, producing multiple observations.
-    # todo remove the word new
-    export_var = (export_dir_path + '\\{0}_image_list.csv'.format(variable))
+    export_var = os.path.join(export_dir_path, '{0}_image_list.csv'.format(variable))
+    print("export_var: ", export_var)
+
     with open(export_var, "w") as output:
         writer = csv.writer(output, lineterminator='\n')
         for file in list_image:
-            print([file])
+            #print([file])
             writer.writerow([file])
 
     return export_var
 
 
-def main_routine(export_dir_path, variable_dir, end_file_name, variable, sub_dir_list, qld_grid_dir):
-
+def main_routine(variable_dir, ver_name, end_file_name, temp_dir_path):
     print("Init qld lists")
 
-    # os walk
-    year_dir_list = next(os.walk(variable_dir))[1]
-    print(year_dir_list)
+    # call the list_dir_fn function to return a list of the rainfall raster images.
+    list_image = list_dir_fn(variable_dir, end_file_name)
 
+    export_csv = output_csv_fn(list_image, temp_dir_path, ver_name)
 
-
-    total_list = []
-    for n in year_dir_list:
-        print(n)
-        ver_year_dir = os.path.join(qld_grid_dir, variable, n)
-        print(ver_year_dir)
-
-        # call the list_dir_fn function to return a list of the rainfall raster images.
-        list_image = list_dir_fn(ver_year_dir, end_file_name)
-        total_list.extend(list_image)
-        #print("image_list: ", list_image)
-
-    #print(total_list)
-
-    # call the rainfall_start_finish_dates_fn function to sorts the list of rainfall image paths numerically
-    # and extract the first and last dates for the available rainfall images.
-    #rain_start_date, rain_finish_date = rainfall_start_finish_dates_fn(list_image)
-
-    # call the output_csv_fn function to return a csv containing each file paths stored in the list_image variable
-    # (1 path per line).
-    export_csv = output_csv_fn(total_list, export_dir_path, variable)
-    #export_csv = output_csv_fn(list_image, export_dir_path, variable)
     print("export csv: ", export_csv)
 
-
-    return export_csv #, rain_start_date, rain_finish_date
+    return export_csv  #, rain_start_date, rain_finish_date
 
 
 if __name__ == "__main__":
