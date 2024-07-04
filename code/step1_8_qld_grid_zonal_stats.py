@@ -59,6 +59,7 @@ SOFTWARE.
 ========================================================================================================
 '''
 
+
 def met_correction_fn(output_zonal_stats, var_, variable_values):
     """ Replace specific 0 values with Null values and correct b1, b2 and b3 calculations
     (refer to Fractional Cover metadata)
@@ -71,16 +72,26 @@ def met_correction_fn(output_zonal_stats, var_, variable_values):
 
     output_zonal_stats['{0}_min'.format(var_)] = output_zonal_stats['{0}_min'.format(var_)].replace(0, np.nan)
     #
-    output_zonal_stats['{0}_min'.format(var_)] = (output_zonal_stats['{0}_min'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_max'.format(var_)] = (output_zonal_stats['{0}_max'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_mean'.format(var_)] = (output_zonal_stats['{0}_mean'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_med'.format(var_)] = (output_zonal_stats['{0}_med'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_p25'.format(var_)] = (output_zonal_stats['{0}_p25'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_p50'.format(var_)] = (output_zonal_stats['{0}_p50'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_p75'.format(var_)] = (output_zonal_stats['{0}_p75'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_p95'.format(var_)] = (output_zonal_stats['{0}_p95'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_p99'.format(var_)] = (output_zonal_stats['{0}_p99'.format(var_)] * variable_values[2]) +  variable_values[4]
-    output_zonal_stats['{0}_range'.format(var_)] = (output_zonal_stats['{0}_range'.format(var_)] * variable_values[2]) +  variable_values[4]
+    output_zonal_stats['{0}_min'.format(var_)] = (output_zonal_stats['{0}_min'.format(var_)] * variable_values[2]) + \
+                                                 variable_values[4]
+    output_zonal_stats['{0}_max'.format(var_)] = (output_zonal_stats['{0}_max'.format(var_)] * variable_values[2]) + \
+                                                 variable_values[4]
+    output_zonal_stats['{0}_mean'.format(var_)] = (output_zonal_stats['{0}_mean'.format(var_)] * variable_values[2]) + \
+                                                  variable_values[4]
+    output_zonal_stats['{0}_med'.format(var_)] = (output_zonal_stats['{0}_med'.format(var_)] * variable_values[2]) + \
+                                                 variable_values[4]
+    output_zonal_stats['{0}_p25'.format(var_)] = (output_zonal_stats['{0}_p25'.format(var_)] * variable_values[2]) + \
+                                                 variable_values[4]
+    output_zonal_stats['{0}_p50'.format(var_)] = (output_zonal_stats['{0}_p50'.format(var_)] * variable_values[2]) + \
+                                                 variable_values[4]
+    output_zonal_stats['{0}_p75'.format(var_)] = (output_zonal_stats['{0}_p75'.format(var_)] * variable_values[2]) + \
+                                                 variable_values[4]
+    output_zonal_stats['{0}_p95'.format(var_)] = (output_zonal_stats['{0}_p95'.format(var_)] * variable_values[2]) + \
+                                                 variable_values[4]
+    output_zonal_stats['{0}_p99'.format(var_)] = (output_zonal_stats['{0}_p99'.format(var_)] * variable_values[2]) + \
+                                                 variable_values[4]
+    output_zonal_stats['{0}_range'.format(var_)] = (output_zonal_stats['{0}_range'.format(var_)] * variable_values[2]) + \
+                                                   variable_values[4]
 
 
 def project_shapefile_gcs_wgs84_fn(gcs_wgs84_dir, geo_df):
@@ -109,6 +120,7 @@ def project_shapefile_gcs_wgs84_fn(gcs_wgs84_dir, geo_df):
 
     return cgs_df, projected_shape_path
 
+
 # def no_data_fn(img_path):
 #     from rios import applier, fileinfo
 #     """ Get the files no data value"""
@@ -135,7 +147,8 @@ def project_shapefile_gcs_wgs84_fn(gcs_wgs84_dir, geo_df):
 #
 #     return
 
-def apply_zonal_stats_fn(image_s, projected_shape_path, uid, qld_dict, variable):
+def apply_zonal_stats_fn(image_s, projected_shape_path, uid, datesplit_s, datesplit_e):
+
     """
     Derive zonal stats for a list of Landsat imagery.
 
@@ -150,31 +163,14 @@ def apply_zonal_stats_fn(image_s, projected_shape_path, uid, qld_dict, variable)
     site_id_list = []
     image_name_list = []
 
-    #no_data_value = no_data_fn(image_s)
-    #print("Working on variable: ", variable)
-    #print(qld_dict)
-    #variable_values = qld_dict.get(variable)
+    no_data = -1  #variable_values[3]  # the no_data value for the silo max_temp raster imagery
 
-    #print("variable_values: ", variable_values)
-    no_data = -1 #variable_values[3]  # the no_data value for the silo max_temp raster imagery
-
-
-    print("*"*50)
-    print("no data: ", no_data)
+    #print("*" * 50)
+    #print("no data: ", no_data)
     with rasterio.open(image_s, nodata=no_data) as srci:
 
         affine = srci.transform
         array = srci.read(1)
-
-
-        #print("array: ", array)
-        #print("Array shape: ", array.shape)
-        #array = array + 3276.5
-
-        #print("updated array: ", array)
-        #print("Updated array shape: ", array.shape)
-        #print("Scaled updated array: ", array)
-        #print("Scaled Updated array shape: ", array.shape)
 
         # open the 'GCSWGS84' projected shapefile (1ha sites)
         with fiona.open(projected_shape_path) as src:
@@ -187,40 +183,28 @@ def apply_zonal_stats_fn(image_s, projected_shape_path, uid, qld_dict, variable)
             #print(zs)
             # using "all_touched=True" will increase the number of pixels used to produce the stats "False" reduces
             # the number extract the image name from the opened file from the input file read in by rasterio
-            print(zs)
+            #print(zs)
             list_a = str(srci).rsplit('\\')
             #print("list_a: ", list_a)
             file_name = list_a[-1]
-            print("file_name: ", file_name)
+            #print("file_name: ", file_name)
             list_b = file_name.rsplit("'")
             file_name_final = list_b[0]
-            img_date = file_name_final[-23:-17]
-            print("img date: ", img_date)
-            print("ZS: ", zs)
+            img_date = file_name_final[datesplit_s:datesplit_e]
+            #img_date = file_name_final[-23:-17]
+            #print("img date: ", img_date)
+            #print("ZS: ", zs)
 
             for zone in zs:
                 zone_stats = zone
-                # count = zone_stats["count"]
                 mean = zone_stats["mean"]
-                # minimum = zone_stats["min"]
-                # maximum = zone_stats['max']
-                # med = zone_stats['median']
-                # std = zone_stats['std']
-                # percentile_25 = zone_stats["percentile_25"]
-                # percentile_50 = zone_stats["percentile_50"]
-                # percentile_75 = zone_stats['percentile_75']
-                # percentile_95 = zone_stats['percentile_95']
-                # percentile_99 = zone_stats['percentile_99']
-                # range_ = zone_stats['range']
-
-
 
 
                 # put the individual results in a list and append them to the zone_stats list
-                result = [mean, ] #std, med, minimum, maximum, count, percentile_25, percentile_50,
-                         # percentile_75, percentile_95, percentile_99, range_]
+                result = [mean, ]  #std, med, minimum, maximum, count, percentile_25, percentile_50,
+                # percentile_75, percentile_95, percentile_99, range_]
 
-                print("Result: ", result)
+                #print("Result: ", result)
                 zone_stats_list.append(result)
 
             # extract out the site number for the polygon
@@ -249,7 +233,7 @@ def apply_zonal_stats_fn(image_s, projected_shape_path, uid, qld_dict, variable)
     return final_results
 
 
-def clean_data_frame_fn(output_list, max_temp_output_dir, data_type): #variable, var_, qld_dict):
+def clean_data_frame_fn(output_list, max_temp_output_dir, data_type):  #variable, var_, qld_dict):
     """ Create dataframe from output list, clean and export dataframe to a csv to export directory/max_temp sub-directory.
 
     @param output_list: list object created by appending the final results list elements.
@@ -260,10 +244,7 @@ def clean_data_frame_fn(output_list, max_temp_output_dir, data_type): #variable,
     """
 
     # convert the list to a pandas dataframe with a headers
-    headers = ['ident', 'site', 'im_date', 'mean', 'im_name']#var_ + '_std', var_ + '_med', var_ + '_min',
-               #var_ + '_max', var_ + '_count', var_ + "_p25", var_ + "_p50", var_ + "_p75", var_ + "_p95",
-               #var_ + "_p99", var_ + "_range", 'im_name']
-
+    headers = ['ident', 'site', 'im_date', 'mean', 'im_name']
     df1 = pd.DataFrame.from_records(output_list)
     print(df1)
     output_df = pd.DataFrame.from_records(output_list, columns=headers)
@@ -290,6 +271,7 @@ def clean_data_frame_fn(output_list, max_temp_output_dir, data_type): #variable,
                 str(i), variable))
             # export the pandas df to a csv file
             out_df.to_csv(out_path, index=False)
+            print("out_path: ", out_path)
 
 
     else:
@@ -297,16 +279,17 @@ def clean_data_frame_fn(output_list, max_temp_output_dir, data_type): #variable,
             str(site), variable))
         # export the pandas df to a csv file
         output_df.to_csv(out_path, index=False)
+        print("out_path: ", out_path)
 
     return output_df
 
 
-def main_routine(in_dir, out_dir, csv_list, data_type, temp_dir_path, qld_dict, geo_df, dict_, met_ver, shapefile_path):
+def main_routine(in_dir, out_dir, csv_list, data_type, temp_dir_path, qld_dict, geo_df, met_ver, shapefile_path,
+                 datesplit_s, datesplit_e):
     """ Calculate the zonal statistics for each 1ha site per QLD monthly max_temp image (single band).
     Concatenate and clean final output DataFrame and export to the Export directory/zonal stats.
 
     xport_dir_path, zonal_stats_ready_dir, fpc_output_zonal_stats, fpc_complete_tile, i, csv_file, temp_dir_path, qld_dict"""
-
 
     uid = 'uid'
     output_list = []
@@ -314,48 +297,29 @@ def main_routine(in_dir, out_dir, csv_list, data_type, temp_dir_path, qld_dict, 
     variable_values = qld_dict.get(met_ver)
     print(variable_values)
     var_ = variable_values[-1]
-    print('Var_', var_)
+    #print('Var_', var_)
     #print("geo df: ", geo_df)
 
-    # import sys
-    # sys.exit()
-
-    # define the GCSWGS84 directory pathway
-    #gcs_wgs84_dir = (temp_dir_path + '\\gcs_wgs84')
-
-    # define the max_tempOutput directory pathway
-    #output_dir = (os.path.join(export_dir_path, variable)) # + '\\max_temp')
-
-    # call the project_shapefile_gcs_wgs84_fn function
-    #cgs_df, projected_shape_path = project_shapefile_gcs_wgs84_fn(gcs_wgs84_dir, geo_df)
-
-    print("csv_file: ", csv_list)
-
+    #print("csv_file: ", csv_list)
 
     # open the list of imagery and read it into memory and call the apply_zonal_stats_fn function
     with open(csv_list, 'r') as imagery_list:
 
         # loop through the list of imagery and input the image into the raster zonal_stats function
         for image in imagery_list:
-            print('image: ', image)
+            #print('image: ', image)
 
             image_s = image.rstrip()
-            print("image_s: ", image_s)
+            #print("image_s: ", image_s)
 
+            final_results = apply_zonal_stats_fn(image_s, shapefile_path, uid, datesplit_s, datesplit_e)
+            #print("final results: ", final_results)
 
-
-            final_results = apply_zonal_stats_fn(image_s, shapefile_path, uid, qld_dict, data_type)  # cgs_df,projected_shape_path,
-            print("final results: ", final_results)
-
-            print("1_8 line 295")
-            # import sys
-            # sys.exit()
             for i in final_results:
                 output_list.append(i)
 
-
     #call the clean_data_frame_fn function
-    clean_output_temp = clean_data_frame_fn(output_list, out_dir, data_type) #variable, var_, dict_)
+    clean_output_temp = clean_data_frame_fn(output_list, out_dir, data_type)  #variable, var_, dict_)
 
     print("18 - 354")
     # import sys

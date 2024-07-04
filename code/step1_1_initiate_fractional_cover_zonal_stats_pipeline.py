@@ -125,7 +125,6 @@ def get_cmd_args_fn():
     p = argparse.ArgumentParser(
         description='''Input a single or multi-band raster to extracts the values from the input shapefile. ''')
 
-
     p.add_argument('-d', '--data', help='The directory the site points csv file.')
 
     p.add_argument('-x', '--export_dir',
@@ -168,7 +167,7 @@ def temporary_dir_fn():
     # extract user name
     home_dir = os.path.expanduser("~")
     _, user = home_dir.rsplit('\\', 1)
-    final_user = user#[3:]
+    final_user = user  #[3:]
 
     # create file name based on date and time.
     date_time_replace = str(datetime.now()).replace('-', '')
@@ -252,7 +251,7 @@ def export_file_path_fn(export_dir, final_user):
     return export_dir_path
 
 
-def export_dir_folders_fn(export_dir_path, met_ver, sub_dir_list):
+def export_dir_folders_list_fn(export_dir_path, met_ver, sub_dir_list):
     """ Create sub-folders within the export directory.
 
     @param export_dir_path: string object containing the newly created export directory path.
@@ -271,13 +270,31 @@ def export_dir_folders_fn(export_dir_path, met_ver, sub_dir_list):
     os.mkdir(met_dir)
     ex_dir_path_list = []
     for i in sub_dir_list:
-
         i_output_dir = (os.path.join(met_dir, i))
-        os.mkdir(i_output_dir)
+        #os.mkdir(i_output_dir)
         print(f"Created: {i_output_dir}")
         ex_dir_path_list.append(i_output_dir)
 
     return ex_dir_path_list
+
+
+def export_dir_folders_fn(out):
+    """ Create sub-folders within the export directory.
+
+    @param export_dir_path: string object containing the newly created export directory path.
+    @return tile_status_dir: string object containing the newly created folder (tile_status) with three sub-folders:
+    for_processing, insufficient_files and tile_status_lists.
+    @return tile_status_dir:
+    @return plot_dir:
+    @return zonal_stats_output_dir:
+    @return rainfall_output_dir:
+    """
+    ex_dir_path_list = []
+    for i in out:
+        os.mkdir(i)
+        print(f"Created: {i}")
+        ex_dir_path_list.append(i)
+
 
 def find_directories_with_file_type(root_dir, file_extension):
     # List to store directories containing the specified file type
@@ -308,6 +325,7 @@ def split_path_at_4th_dir(path):
 
     return first_part, second_part
 
+
 def main_routine():
     """" Description: This script determines which Landsat tile had the most non null zonal statistics records per site
     and files those plots (bare ground, all bands and interactive) into final output folders. """
@@ -326,25 +344,24 @@ def main_routine():
 
     # dictionary {varable: [string_val, unit, variable, scale, null_data, add_offset, out_name]
     qld_dict = {"rh_tmax": [-20, "%", "rh_tmax", 0.1, -32767.0, 3276.5, "rhmax"],
-             "rh_tmin": [-20, "%", "rh_tmin", 0.1, -32767.0, 3276.5, "rhmin"],
-             "daily_rain": [-23, "mm", "rain_d", 0.1, -32767.0, 3276.5, "dlyrn"],
-             "et_morton_actual": [-29, "mm", "et_ma", 0.1, -32767.0, 0.0, "morat"],
-             # "et_morton_potential": ["mm", "et_mp", 0.1, -32767.0, 0.0],
-             # "et_morton_wet": ["mm", "et_mw", 0.1, -32767.0, 0.0],
-             # "et_short_crop": ["mm", "et_sc", 0.1, -32767.0, 0.0],
-             # "et_tall_crop": ["mm", "et_tc", 0.1, -32767.0, 0.0],
-             # "evap_morton_lake": ["mm", "evp_ml", 0.1, -32767.0, 0.0],
-             # "evap_pan": ["mm", "evp_s", 0.1, -32767.0, 0.0],
-             # "evap_syn": ["mm", "evp_s", 0.1, -32767.0, 0.0],
-             "max_temp": [-21, "C", "tmax", 0.1, -32767.0, 0.0, "tpmax"],
-             "min_temp": [-21, "C", "tmin", 0.1, -32767.0, 0.0, "tpmin"],
-             "monthly_rain": ["mm", "rain_m", 0.1, -32767.0, 3276.5, "monrn"],
-             # "mslp": ["hPa", "mslp", 0.1, -32767.0, 0.0],
-             # "radiation": ["MJ/m2", "rad", 0.1, -32767.0, 0.0],
-             # "vp": ["hPa", "vp", 0.1, -32767.0, 0.0],
-             # "vp_deficit": ["hPa", "vp_d", 0.1, -32767.0, 0.0],
-             }
-
+                "rh_tmin": [-20, "%", "rh_tmin", 0.1, -32767.0, 3276.5, "rhmin"],
+                "daily_rain": [-23, "mm", "rain_d", 0.1, -32767.0, 3276.5, "dlyrn"],
+                "et_morton_actual": [-29, "mm", "et_ma", 0.1, -32767.0, 0.0, "morat"],
+                # "et_morton_potential": ["mm", "et_mp", 0.1, -32767.0, 0.0],
+                # "et_morton_wet": ["mm", "et_mw", 0.1, -32767.0, 0.0],
+                # "et_short_crop": ["mm", "et_sc", 0.1, -32767.0, 0.0],
+                # "et_tall_crop": ["mm", "et_tc", 0.1, -32767.0, 0.0],
+                # "evap_morton_lake": ["mm", "evp_ml", 0.1, -32767.0, 0.0],
+                # "evap_pan": ["mm", "evp_s", 0.1, -32767.0, 0.0],
+                # "evap_syn": ["mm", "evp_s", 0.1, -32767.0, 0.0],
+                "max_temp": [-21, "C", "tmax", 0.1, -32767.0, 0.0, "tpmax"],
+                "min_temp": [-21, "C", "tmin", 0.1, -32767.0, 0.0, "tpmin"],
+                "monthly_rain": ["mm", "rain_m", 0.1, -32767.0, 3276.5, "monrn"],
+                # "mslp": ["hPa", "mslp", 0.1, -32767.0, 0.0],
+                # "radiation": ["MJ/m2", "rad", 0.1, -32767.0, 0.0],
+                # "vp": ["hPa", "vp", 0.1, -32767.0, 0.0],
+                # "vp_deficit": ["hPa", "vp_d", 0.1, -32767.0, 0.0],
+                }
 
     dict_values = qld_dict.get(met_ver)
     print("variable: ", dict_values)
@@ -368,7 +385,7 @@ def main_routine():
     list_of_dir_create = []
     for directory in directories:
         list_of_directories.append(directory)
-        print("-"*20)
+        print("-" * 20)
         print(directory)
 
         first_part, second_part = split_path_at_4th_dir(directory)
@@ -380,11 +397,10 @@ def main_routine():
         list_of_dir_create.append(out_sub_dir)
 
     #     print(i, n)
-    ex_dir_path_list = export_dir_folders_fn(export_dir_path, met_ver, list_of_dir_create)
-
+    ex_dir_path_list = export_dir_folders_list_fn(export_dir_path, met_ver, list_of_dir_create)
+    # print("ex_dir_path_list: ", ex_dir_path_list)
     # import sys
     # sys.exit()
-
 
     prop_of_interest = "None"
 
@@ -395,18 +411,69 @@ def main_routine():
     # select_sub_list = sub_dir_list
     # print(select_sub_list)
 
-
-
     sub_dir_list_csv = []
-    for i, o in zip(list_of_directories, ex_dir_path_list):
-        print(i, o)
 
-        import step1_2_list_of_qld_grid_images
-        export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, "tif", temp_dir_path)
+    select_o = []
+    select_i = []
+    select_c = []
+    select_d = []
+    datesplit_s = []
+    datesplit_e = []
+
+    create_ex_dir = []
+    for i, o, d in zip(list_of_directories, ex_dir_path_list, list_of_dir_create):
+        print("i: ", i)
+        print("o:", o)
+        print("d:", d)
+        # import sys
+        # sys.exit()
+
+        if i.endswith("cor"):
+            print("i cor: ", i)
+            print("o cor:", o)
+            select_o.append(o)
+            select_i.append(i)
+            select_d.append(d)
+            datesplit_s.append(-19)
+            datesplit_e.append(-11)
+            import step1_2_list_of_qld_grid_images
+            export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
             #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
+            select_c.append(export_csv)
 
-        sub_dir_list_csv.append(export_csv)
+        elif i.endswith("siav") or i.endswith("simd"):
+            print("i siav or simd: ", i)
+            print("o siav or simd:", o)
+            select_o.append(o)
+            select_i.append(i)
+            select_d.append(d)
+            datesplit_s.append(-23)
+            datesplit_e.append(-17)
+            import step1_2_list_of_qld_grid_images
+            export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
+            #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
+            select_c.append(export_csv)
+        #todo change mmed and mavg to smed and savg
+        elif i.endswith("mavg") or i.endswith("mmed"):
+            print("i mavg or mmed: ", i)
+            print("o mavg or mmed:", o)
+            select_o.append(o)
+            select_i.append(i)
+            select_d.append(d)
+            datesplit_s.append(-23)
+            datesplit_e.append(-17)
+            import step1_2_list_of_qld_grid_images
+            export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
+            #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
+            select_c.append(export_csv)
+        else:
+            pass
 
+    print(export_csv)
+    export_dir_folders_fn(select_o)
+
+    # import sys
+    # sys.exit()
     import step1_3_project_buffer
     geo_df2, crs_name = step1_3_project_buffer.main_routine(data, export_dir_path, prime_temp_buffer_dir)
 
@@ -419,24 +486,16 @@ def main_routine():
                     driver="ESRI Shapefile")
 
     print("Exported shapefile: ", shapefile_path)
-    #
-    print("1_1 line 511")
 
-    for in_dir, out_dir, csv_list, data_type in zip(list_of_directories, ex_dir_path_list, sub_dir_list_csv, list_of_dir_create):
-        #for i in sub_dir_list_csv:
-        print(in_dir, out_dir, csv_list)
+    for in_dir, out_dir, csv_list, data_type, date_s, date_e in zip(select_i, select_o, select_c,
+                                                                    select_d, datesplit_s, datesplit_e):
+
         import step1_8_qld_grid_zonal_stats
         step1_8_qld_grid_zonal_stats.main_routine(
-            in_dir, out_dir, csv_list, data_type, temp_dir_path, qld_dict, geo_df2, qld_dict, met_ver, shapefile_path)
+            in_dir, out_dir, csv_list, data_type, temp_dir_path, qld_dict, geo_df2, met_ver, shapefile_path, date_s,
+            date_e)
 
         print(f"completed: ", out_dir)
-        # import sys
-        # sys.exit()
-
-
-    # import sys
-    # sys.exit()
-    # print("step1 8 QLD grid")
 
     # ---------------------------------------------------- Clean up ----------------------------------------------------
 

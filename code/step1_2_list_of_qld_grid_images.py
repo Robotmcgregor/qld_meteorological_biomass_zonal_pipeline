@@ -70,7 +70,7 @@ def list_dir_fn(rainfall_dir, end_file_name):
     return list_image
 
 
-def output_csv_fn(list_image, export_dir_path, variable):
+def output_csv_fn(list_image, temp_dir_path, variable):
     """ Return a csv containing each file paths stored in the list_image variable (1 path per line).
 
     @param list_image: list object containing the path to all rainfall images within the rainfall directory that meet
@@ -78,30 +78,25 @@ def output_csv_fn(list_image, export_dir_path, variable):
     @param export_dir_path: string object containing the path to the export directory.
     @return export_rainfall: string object containing the path to the populated csv.
     """
+
     # assumes that file_list is a flat list, it adds a new path in a new row, producing multiple observations.
-    export_var = os.path.join(export_dir_path, '{0}_image_list.csv'.format(variable))
-    print("export_var: ", export_var)
+    export_var = os.path.join(temp_dir_path, '{0}_image_list.csv'.format(variable))
 
     with open(export_var, "w") as output:
         writer = csv.writer(output, lineterminator='\n')
         for file in list_image:
-            #print([file])
             writer.writerow([file])
 
     return export_var
 
 
-def main_routine(variable_dir, ver_name, end_file_name, temp_dir_path):
-    print("Init qld lists")
-
+def main_routine(variable_dir, o, d, end_file_name, temp_dir_path):
     # call the list_dir_fn function to return a list of the rainfall raster images.
     list_image = list_dir_fn(variable_dir, end_file_name)
 
-    export_csv = output_csv_fn(list_image, temp_dir_path, ver_name)
+    export_csv = output_csv_fn(list_image, temp_dir_path, d)
 
-    print("export csv: ", export_csv)
-
-    return export_csv  #, rain_start_date, rain_finish_date
+    return export_csv
 
 
 if __name__ == "__main__":
