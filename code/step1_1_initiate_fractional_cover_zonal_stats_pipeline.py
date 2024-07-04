@@ -454,18 +454,18 @@ def main_routine():
             #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
             select_c.append(export_csv)
         #todo change mmed and mavg to smed and savg
-        elif i.endswith("mavg") or i.endswith("mmed"):
-            print("i mavg or mmed: ", i)
-            print("o mavg or mmed:", o)
-            select_o.append(o)
-            select_i.append(i)
-            select_d.append(d)
-            datesplit_s.append(-23)
-            datesplit_e.append(-17)
-            import step1_2_list_of_qld_grid_images
-            export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
-            #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
-            select_c.append(export_csv)
+        # elif i.endswith("mavg") or i.endswith("mmed"):
+        #     print("i mavg or mmed: ", i)
+        #     print("o mavg or mmed:", o)
+        #     select_o.append(o)
+        #     select_i.append(i)
+        #     select_d.append(d)
+        #     datesplit_s.append(-23)
+        #     datesplit_e.append(-17)
+        #     import step1_2_list_of_qld_grid_images
+        #     export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
+        #     #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
+        #     select_c.append(export_csv)
         else:
             pass
 
