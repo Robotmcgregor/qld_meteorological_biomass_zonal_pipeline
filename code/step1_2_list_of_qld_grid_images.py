@@ -93,6 +93,7 @@ def output_csv_fn(list_image, temp_dir_path, variable):
 def main_routine(variable_dir, o, d, end_file_name, temp_dir_path):
     # call the list_dir_fn function to return a list of the rainfall raster images.
     list_image = list_dir_fn(variable_dir, end_file_name)
+    print("list_image", list_image)
 
     export_csv = output_csv_fn(list_image, temp_dir_path, d)
 

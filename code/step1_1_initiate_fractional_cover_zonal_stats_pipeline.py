@@ -233,7 +233,7 @@ def export_file_path_fn(export_dir, final_user):
     date_time_replace = str(datetime.now()).replace('-', '')
     date_time_list = date_time_replace.split(' ')
     date_time_list_split = date_time_list[1].split(':')
-    export_dir_path = export_dir + '\\' + final_user + '_met_ver_zonal_' + str(date_time_list[0]) + '_' + str(
+    export_dir_path = export_dir + '\\' + final_user + '_move_met_ver_zonal_' + str(date_time_list[0]) + '_' + str(
         date_time_list_split[0]) + str(
         date_time_list_split[1])
 
@@ -429,6 +429,7 @@ def main_routine():
         # sys.exit()
 
         if i.endswith("cor"):
+            print("-" * 30)
             print("i cor: ", i)
             print("o cor:", o)
             select_o.append(o)
@@ -438,10 +439,11 @@ def main_routine():
             datesplit_e.append(-11)
             import step1_2_list_of_qld_grid_images
             export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
-            #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
             select_c.append(export_csv)
+            print("list of files: ", export_csv)
 
         elif i.endswith("siav") or i.endswith("simd"):
+            print("-" * 30)
             print("i siav or simd: ", i)
             print("o siav or simd:", o)
             select_o.append(o)
@@ -451,21 +453,50 @@ def main_routine():
             datesplit_e.append(-17)
             import step1_2_list_of_qld_grid_images
             export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
-            #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
             select_c.append(export_csv)
-        #todo change mmed and mavg to smed and savg
-        # elif i.endswith("mavg") or i.endswith("mmed"):
-        #     print("i mavg or mmed: ", i)
-        #     print("o mavg or mmed:", o)
-        #     select_o.append(o)
-        #     select_i.append(i)
-        #     select_d.append(d)
-        #     datesplit_s.append(-23)
-        #     datesplit_e.append(-17)
-        #     import step1_2_list_of_qld_grid_images
-        #     export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
-        #     #export_dir_path, type_dir, ".tif", str(i), sub_dir_list, met_analysis, met_ver)
-        #     select_c.append(export_csv)
+            print("list of files: ", export_csv)
+
+
+        elif i.endswith("mavg") or i.endswith("mmed"):
+            print("-" * 30)
+            print("i mavg or mmed: ", i)
+            print("o mavg or mmed:", o)
+            select_o.append(o)
+            select_i.append(i)
+            select_d.append(d)
+            datesplit_s.append(-23)
+            datesplit_e.append(-17)
+            import step1_2_list_of_qld_grid_images
+            export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
+            select_c.append(export_csv)
+            print("list of files: ", export_csv)
+
+        elif i.endswith("msum"):
+            print("-"*30)
+            print("i msum or msum: ", i)
+            select_o.append(o)
+            select_i.append(i)
+            select_d.append(d)
+            datesplit_s.append(-23)
+            datesplit_e.append(-17)
+            import step1_2_list_of_qld_grid_images
+            export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
+            select_c.append(export_csv)
+            print("list of files: ", export_csv)
+
+        elif i.endswith("ssav") or i.endswith("ssmd"):
+            print("i ssav or ssav: ", i)
+            print("i ssmd or ssmd: ", i)
+            select_o.append(o)
+            select_i.append(i)
+            select_d.append(d)
+            datesplit_s.append(-23)
+            datesplit_e.append(-17)
+            import step1_2_list_of_qld_grid_images
+            export_csv = step1_2_list_of_qld_grid_images.main_routine(i, o, d, "tif", temp_dir_path)
+            select_c.append(export_csv)
+            print("list of files: ", export_csv)
+
         else:
             pass
 
