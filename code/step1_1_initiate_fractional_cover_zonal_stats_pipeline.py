@@ -144,7 +144,7 @@ def get_cmd_args_fn():
     p.add_argument('-s', '--season', help="Enter the season (i.e. annual, wet, dry)",
                    default="ann")
 
-    p.add_argument('-m', '--met_ver', help="Enter the met veriable (i.e. daily_rain, rh_tmax)",
+    p.add_argument('-m', '--met_ver', help="Enter the met variable (i.e. daily_rain, rh_tmax)",
                    default="daily_rain")
 
     cmd_args = p.parse_args()
